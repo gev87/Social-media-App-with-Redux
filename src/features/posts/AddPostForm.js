@@ -39,7 +39,6 @@ function AddFormPost() {
     setContent('');
   };
 
-  console.log("userId", userId);
 
   return (
     <section>
