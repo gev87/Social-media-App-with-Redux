@@ -16,6 +16,14 @@ export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
   return response.data;
 });
 
+export const addNewPost = createAsyncThunk(
+  'posts/addNewPost',
+  async (initialPost) => {
+    const response = await client.post('/fakeApi/posts', initialPost);
+    return response.data;
+  }
+);
+
 const postsSlice = createSlice({
   name: 'posts',
   initialState,
@@ -24,7 +32,9 @@ const postsSlice = createSlice({
       const { postId, reaction } = action.payload;
       const existingPost = state.posts.find((post) => post.id === postId);
       if (existingPost) {
+        console.log(existingPost.reactions,reaction);
         if (existingPost.reactions) {
+          console.log(",existingPost.reactions[reaction]",existingPost.reactions[reaction]);
           existingPost.reactions[reaction]++;
         }
       }
@@ -59,18 +69,21 @@ const postsSlice = createSlice({
   },
   extraReducers(builder) {
     builder
-      .addCase(fetchPosts.pending,(state) => {
+      .addCase(fetchPosts.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchPosts.fulfilled,(state,action) => {
+      .addCase(fetchPosts.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.posts = state.posts.concat(action.payload);
       })
-      .addCase(fetchPosts.rejected,(state,action) => {
+      .addCase(fetchPosts.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
+      })
+      .addCase(addNewPost.fulfilled, (state, action) => {
+        state.posts.push(action.payload);
       });
-  }
+  },
 });
 
 export const { postAdded, postUpdated, reactionAdded } = postsSlice.actions;
