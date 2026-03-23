@@ -5,7 +5,7 @@ const initialState = [];
 
 export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
   const response = await client.get('fakeApi/users');
-  return response;
+  return response.data;
 })
 
 const usersSlice = createSlice({
@@ -14,7 +14,7 @@ const usersSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchUsers.fulfilled,(state,action) => {
-      return action.payload.data;
+      return action.payload;
     });
   }
 });
