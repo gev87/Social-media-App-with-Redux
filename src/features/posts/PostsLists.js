@@ -4,10 +4,10 @@ import PostAuthor from './PostAuthor';
 import TimeAgo from './TimeAgo';
 import ReactionButtons from '../reactions/ReactionButtons';
 import { fetchPosts, selectAllPosts } from './postsSlice';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Spinner } from '../../components/Spinner';
 
-const PostExcerpts = ({ post }) => {
+const PostExcerpts = React.memo(function PostExcerpts({ post }) {
   return (
     <article className="post-excerpt">
       <h3>{post.title}</h3>
@@ -22,7 +22,7 @@ const PostExcerpts = ({ post }) => {
       </Link>
     </article>
   );
-};
+});
 
 export const PostLists = () => {
   const posts = useSelector(selectAllPosts);
