@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import PostAuthor from './PostAuthor';
 import TimeAgo from './TimeAgo';
 import ReactionButtons from '../reactions/ReactionButtons';
-import { fetchPosts, selectAllPosts } from './postsSlice';
+import { fetchPosts, selectPostById, selectPostIds } from './postsSlice';
 import React, { useEffect } from 'react';
 import { Spinner } from '../../components/Spinner';
 
-const PostExcerpts = React.memo(function PostExcerpts({ post }) {
+const PostExcerpts = React.memo(function PostExcerpts({ postId }) {
+  const post = useSelector((state) => selectPostById(state, postId));
   return (
     <article className="post-excerpt">
       <h3>{post.title}</h3>
@@ -25,8 +26,8 @@ const PostExcerpts = React.memo(function PostExcerpts({ post }) {
 });
 
 export const PostLists = () => {
-  const posts = useSelector(selectAllPosts);
   const dispatch = useDispatch();
+  const orderedPostsIds = useSelector(selectPostIds);
   const postStatus = useSelector((state) => state.posts.status);
   const error = useSelector((state) => state.posts.error);
 
@@ -40,13 +41,16 @@ export const PostLists = () => {
   if (postStatus === 'loading') {
     content = <Spinner text="Loading..." />;
   } else if (postStatus === 'succeeded') {
-    const orderedPosts = posts
+    /*const orderedPosts = posts
       .slice()
       .sort((a, b) => b.date.localeCompare(a.date));
     content = orderedPosts.map((post) => (
       <PostExcerpts key={post.id} post={post} />
+    ));*/
+    content = orderedPostsIds.map((postId) => (
+      <PostExcerpts key={postId} postId={postId} />
     ));
-  } else if (postStatus === 'failed') {
+  } else if (postStatus === 'error') {
     content = <div>{error}</div>;
   }
 
