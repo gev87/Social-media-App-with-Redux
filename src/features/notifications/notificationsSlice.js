@@ -1,5 +1,13 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createEntityAdapter,
+  createSlice,
+} from '@reduxjs/toolkit';
 import { client } from '../../api/client';
+
+const notificationsAdapter = createEntityAdapter({
+  sortComparer: (a, b) => b.date.localeCompare(a.date),
+});
 
 export const fetchNotifications = createAsyncThunk(
   'notifications/fetchNotifications',
@@ -16,20 +24,22 @@ export const fetchNotifications = createAsyncThunk(
 
 const notificationsSlice = createSlice({
   name: 'notifications',
-  initialState: [],
+  initialState: notificationsAdapter.getInitialState(),
   reducers: {
     allNotificationsRead(state, action) {
-      state.forEach((notification) => (notification.isNew = false));
+      Object.values(state.entities).forEach(
+        (notification) => (notification.isNew = false)
+      );
     },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchNotifications.fulfilled, (state, action) => {
-      const newNotifications = action.payload.map((notification) => {
-        notification.isNew = true;
-        return notification;
-      });
-      state.push(...newNotifications);
-      state.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const newNotifications = action.payload.map((notification) => ({
+        ...notification,
+        isNew: true,
+      }));
+
+      notificationsAdapter.upsertMany(state, newNotifications);
     });
   },
 });
@@ -38,4 +48,5 @@ export const { allNotificationsRead } = notificationsSlice.actions;
 
 export default notificationsSlice.reducer;
 
-export const selectAllNotifications = (state) => state.notifications;
+export const { selectAll: selectAllNotifications } =
+  notificationsAdapter.getSelectors((state) => state.notifications);
